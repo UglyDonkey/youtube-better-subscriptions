@@ -251,18 +251,26 @@ function removeWatchedAndAddButton() {
 
     let hiddenCount = 0;
 
+    let shouldLoad = true;
+
     for (let item of els) {
         let videoId = getVideoId(item);
         let stored = videoId in storage;
         let dismissableDiv = item.firstElementChild;
         let button = stored ? MARK_UNWATCHED_BTN : MARK_WATCHED_BTN;
 
+        let isOld = item.querySelector('#metadata-line').textContent.includes('month');
+
         if (!stored && isYouTubeWatched(item)) {
             markWatched(item, videoId);
             stored = true;
-        } else if (stored && hideWatched) {
+        } else if ((isOld || stored) && hideWatched) {
             hideItem(item);
             hiddenCount++;
+        }
+
+        if(isOld) {
+            shouldLoad = false;
         }
 
         // does it already have any button?
@@ -284,7 +292,7 @@ function removeWatchedAndAddButton() {
     log("Removing watched from feed and adding overlay... Done");
 
     // if we hid any videos, see if sections need changing, or videos loading
-    if (hiddenCount > 0) {
+    if (shouldLoad && hiddenCount > 0) {
         processSections();
         loadMoreVideos();
     }
